@@ -30,7 +30,11 @@ app.use(session({
   secret: process.env.SESSION_SECRET || 'uxtes_secret_2016',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 30 * 24 * 60 * 60 * 1000 }
+  cookie: {
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    sameSite: 'lax',
+    secure: false
+  }
 }));
 
 app.use(helmet({ contentSecurityPolicy: false }));
@@ -773,9 +777,18 @@ async function acceptCall(fromUserId, offer) {
 
 async function init() {
   await requestNotif();
-  const meRes = await fetch('/me');
-  if (meRes.status === 401) return renderAuth();
-  currentUser = await meRes.json();
+  try {
+    const meRes = await fetch('/me');
+    if (meRes.status === 401) {
+      renderAuth();
+      return;
+    }
+    currentUser = await meRes.json();
+  } catch (err) {
+    console.error('Init error:', err);
+    renderAuth();
+    return;
+  }
   await loadBlocks();
   document.getElementById('app').innerHTML = \`
     <div class="app">
