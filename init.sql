@@ -29,5 +29,12 @@ CREATE TABLE blocks (
   PRIMARY KEY (blocker_id, blocked_id)
 );
 
+CREATE TABLE session (
+  sid varchar NOT NULL COLLATE "default",
+  sess json NOT NULL,
+  expire timestamp(6) NOT NULL,
+  CONSTRAINT session_pkey PRIMARY KEY (sid) NOT DEFERRABLE INITIALLY IMMEDIATE
+);
+
 CREATE INDEX idx_messages_pair ON messages(from_id, to_id);
 CREATE INDEX idx_messages_time ON messages(sent_at);
